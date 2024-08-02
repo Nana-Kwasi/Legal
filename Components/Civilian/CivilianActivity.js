@@ -1,75 +1,109 @@
 import React from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet } from 'react-native';
-import { getAuth, signOut } from "firebase/auth";
+import { View, Text, SafeAreaView, TouchableOpacity, ScrollView,StyleSheet } from 'react-native';
+import { getAuth, signOut } from 'firebase/auth';
 import app from '../../Authentication/Firebase/Config';
-import { Ionicons } from '@expo/vector-icons'; 
+import { Ionicons } from '@expo/vector-icons';
+import { useCases } from './CaseContext';
 
-const CivilianActivity = ({navigation}) => {
-
+const CivilianActivity = ({ navigation }) => {
     const auth = getAuth(app);
+    const { cases } = useCases(); // Use the custom hook
 
     const handleSignOut = () => {
-        signOut(auth).then(() => {
-            navigation.navigate('LogIn')
-            console.log('Signed Out');
-          }).catch((error) => {
-            console.log(error);
-          });
-          navigation.navigate('Home')
+        signOut(auth)
+            .then(() => {
+                navigation.navigate('Continue');
+                // console.log('Signed Out');
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+        navigation.navigate('Home');
     };
 
     return (
         <SafeAreaView style={styles.activity}>
-            <View style={styles.mainactivity}>
-
-            </View>
-            <View style={styles.activitycover}>
-                <View style={styles.activityemail}>
-                    <Ionicons name="caret-forward-outline" size={20} color="#243035" />
-                    <Text style={styles.email}> {auth.currentUser?.email} </Text>
-                </View>
+            <View style={styles.header}>
                 <TouchableOpacity style={styles.signOutbtn} onPress={handleSignOut}>
                     <Text style={styles.signOut}>SIGN OUT</Text>
                 </TouchableOpacity>
+                <View style={styles.profileSection}>
+                    <Ionicons name="person-circle" size={40} color="#243035" />
+                    <Text style={styles.email}>{auth.currentUser?.email}</Text>
+                </View>
+            </View>
+            <View style={styles.mainactivity}>
+                <Text style={{ fontSize: 20, color: "white", marginHorizontal: 80, marginTop: 30 }}>YOUR HISTORY CASES</Text>
+                <ScrollView>
+                    {cases.map((caseItem) => (
+                        <View key={caseItem.id} style={styles.caseItem}>
+                            <Text style={styles.caseText}>{caseItem.issues}</Text>
+                            <Text style={styles.caseDetails}>Phone: {caseItem.phoneNumber}</Text>
+                            <Text style={styles.caseDetails}>Email: {caseItem.email}</Text>
+                        </View>
+                    ))}
+                </ScrollView>
             </View>
         </SafeAreaView>
     );
-}
+};
+
 
 const styles = StyleSheet.create({
-    activity: {flex: 1},
-    mainactivity: {
+    activity: {
         flex: 1,
-        backgroundColor: '#243035'
+        backgroundColor: '#f8f8f8',
     },
-    activitycover: {
-        flex: 0.1,
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 10,
+        backgroundColor: '#ffffff',
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+    },
+    profileSection: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between'
     },
-    activityemail: {
-        borderBottomWidth: 1,
-        flexDirection: 'row',
-        alignItems: 'center'
+    mainactivity: {
+        flex: 1,
+        backgroundColor: '#243035',
     },
     email: {
         fontSize: 15,
-        fontWeight: '200',
+        fontWeight: '400',
         color: '#243035',
-        fontFamily: 'KohinoorTelugu-Medium' 
+        marginLeft: 10,
+        fontFamily: 'KohinoorTelugu-Medium',
     },
-    signOutbtn:{
-        backgroundColor:'#243035',
-        marginVertical: 10,
-        margin: 5
+    signOutbtn: {
+        backgroundColor: '#243035',
+        padding: 10,
+        borderRadius: 5,
     },
     signOut: {
         color: 'white',
         fontWeight: 'bold',
-        padding: 15,
-        fontFamily: 'KohinoorTelugu-Medium' 
+        fontFamily: 'KohinoorTelugu-Medium',
     },
-})
+    caseItem: {
+        backgroundColor: '#fff',
+        padding: 15,
+        marginVertical: 10,
+        marginHorizontal: 20,
+        borderRadius: 5,
+    },
+    caseText: {
+        fontSize: 16,
+        marginBottom: 5,
+        fontFamily: 'Courier New',
+        color:"black"
+    },
+    caseDetails: {
+        fontSize: 15,
+    },
+});
 
 export default CivilianActivity;

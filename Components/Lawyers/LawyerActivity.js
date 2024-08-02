@@ -10,7 +10,7 @@ const LawyerActivity = ({navigation}) => {
 
     const handleSignOut = () => {
         signOut(auth).then(() => {
-            navigation.navigate('LogIn')
+            navigation.navigate('Continue')
             console.log('Signed Out');
           }).catch((error) => {
             console.log(error);

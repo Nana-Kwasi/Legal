@@ -110,12 +110,14 @@
 
 // export default PenComponent;
 
-import React, { useState, useRef } from 'react';
+ import React, { useState, useRef } from 'react';
 import { View, ScrollView, KeyboardAvoidingView, TextInput, StyleSheet, Text, Platform, TouchableWithoutFeedback, Keyboard, TouchableOpacity, Alert, Animated, Easing } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { v4 as uuidv4 } from "uuid";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import app from '../../Authentication/Firebase/Config';
+import { useCases } from './CaseContext';
+
 
 const PenComponent = ({ navigation }) => {
     const db = getFirestore(app);
@@ -125,6 +127,7 @@ const PenComponent = ({ navigation }) => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [email, setEmail] = useState('');
     const [isSpinning, setIsSpinning] = useState(false);
+    const { addCase } = useCases(); // Use the custom hook
 
     const spinValue = useRef(new Animated.Value(0)).current;
 
@@ -158,7 +161,7 @@ const PenComponent = ({ navigation }) => {
             return;
         }
 
-        spin(); // Start spinning animation
+        spin(); 
 
         const newIssue = {
             issues: issues,
@@ -171,6 +174,7 @@ const PenComponent = ({ navigation }) => {
 
         try {
             await setDoc(doc(db, "Cases", newIssue.id), newIssue);
+            addCase(newIssue); // Add the new issue to the context
         } catch (error) {
             console.log(error);
         }
@@ -180,7 +184,7 @@ const PenComponent = ({ navigation }) => {
         setEmail('');
         setTimeout(() => {
             setIsSpinning(false); // Stop spinning animation after a delay
-            navigation.navigate('Home');
+            // navigation.navigate('Home');
         }, 1000);
     };
 
@@ -266,10 +270,10 @@ const styles = StyleSheet.create({
     textInput: {
         fontSize: 18,
         color: 'white',
-        fontFamily: 'Times New Roman', // Change font as desired
-        lineHeight: 25, // Adjust line height as needed
-        borderBottomColor: 'rgba(255, 255, 255, 0.5)', // Change line color
-        borderBottomWidth: 1, // Change line width
+        fontFamily: 'Times New Roman', 
+        lineHeight: 25, 
+        borderBottomColor: 'rgba(255, 255, 255, 0.5)', 
+        borderBottomWidth: 1, 
     },
     inputWithIcon: {
         flexDirection: 'row',
@@ -306,3 +310,6 @@ const styles = StyleSheet.create({
 });
 
 export default PenComponent;
+
+
+

@@ -5,36 +5,25 @@ import { getFirestore, query, collection, onSnapshot } from 'firebase/firestore'
 import { addIssues } from '../Redux/Action';
 import { useDispatch, useSelector } from 'react-redux';
 import LawyerSingularCases from './LawyerSingularCases'; // Ensure this import is correct
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 
-const MainFrame = () => {
+const NewCasesScreen = () => {
     const db = getFirestore(app);
     const dispatch = useDispatch();
-    const insets = useSafeAreaInsets();
 
     useEffect(() => {
-        const getCases = async () => {
+        const getData = async () => {
             const q = query(collection(db, "Cases"));
             onSnapshot(q, (querySnapshot) => {
                 const issues = [];
                 querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    issues.push({
-                        id: doc.id,
-                        caseName: data.caseName,
-                        phoneNumber: data.phoneNumber,
-                        email: data.email,
-                        whatsappNumber: data.whatsappNumber,
-                        ...data
-                    });
+                    issues.push(doc.data());
                 });
                 dispatch(addIssues(issues));
             });
         };
-        getCases();
+        getData();
     }, [dispatch]);
-    
 
     const showcases = useSelector((state) => state.Reducer1);
     const cases = showcases.issues;
@@ -43,21 +32,16 @@ const MainFrame = () => {
         <SafeAreaView style={{ flex: 1 }}>
             <View style={styles.maincase}>
                 <MaterialIcons name="my-library-books" size={40} color="white" />
-                <Text style={styles.maincasetext}>CASES</Text>
+                <Text style={styles.maincasetext}>NEW CASES</Text>
             </View>
             <View style={styles.display}>
-
-            <FlatList
-    data={receivecases}
-    renderItem={({ item }) => (
-        <LawyerSingularCases
-            lawyer={item} // Pass the entire case object
-        />
-    )}
-    keyExtractor={(item, index) => index.toString()}
-/>
-
-
+                <FlatList
+                    data={cases}
+                    renderItem={({ item }) => (
+                        <LawyerSingularCases lawyer={item} />
+                    )}
+                    keyExtractor={(item, index) => index.toString()}
+                />
             </View>
         </SafeAreaView>
     );
@@ -82,7 +66,7 @@ const styles = StyleSheet.create({
     },
     display: {
         flex: 1
-    },
+    }
 });
 
-export default MainFrame;
+export default NewCasesScreen;

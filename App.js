@@ -11,6 +11,11 @@ import { Provider } from 'react-redux';
 import store from './Redux/Store';
 import 'react-native-get-random-values';
 import LawyerRegistrationForm from './Components/Lawyers/LawyerRegistration';
+import { CasesProvider } from './Components/Civilian/CaseContext';
+
+
+
+
 
 const App = () => {
 
@@ -19,6 +24,7 @@ const App = () => {
   return (
 
     <Provider store={store}>
+      <CasesProvider>
     <NavigationContainer >
         <Starks.Navigator screenOptions={{header:()=>null, presentation:'transparentModal', animationTypeForReplace:'pop'}}>
             <Starks.Screen name='Home' component={Home} />
@@ -31,6 +37,7 @@ const App = () => {
 
         </Starks.Navigator>
     </NavigationContainer>
+    </CasesProvider>
     </Provider>
   );
 };

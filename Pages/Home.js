@@ -118,7 +118,7 @@
 
 // export default Home;
 
-import React, { useEffect } from 'react';
+ import React, { useEffect } from 'react';
 import { StyleSheet, View, Image, Text, TouchableOpacity, ImageBackground, Alert } from 'react-native';
 import official from '../assets/official.png';
 import { FontAwesome } from '@expo/vector-icons';
@@ -128,18 +128,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const Home = ({navigation}) => {
 
     const handleRegister = () => {
-        // Show options for registering as a lawyer or civilian
+      
         Alert.alert(
             'Register as',
             'Choose an option to register as:',
             [
                 {
                     text: 'Lawyer',
-                    onPress: () => navigation.navigate('LawyerRegistration'), // Navigate to lawyer registration screen
+                    onPress: () => navigation.navigate('LawyerRegistration'), 
                 },
                 {
                     text: 'Civilian',
-                    onPress: () => navigation.navigate('Register'), // Navigate to civilian registration screen
+                    onPress: () => navigation.navigate('Register'), 
                 },
                 {
                     text: 'Cancel',
