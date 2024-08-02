@@ -1,15 +1,18 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, FlatList, Text } from 'react-native';
-import { collection, query, onSnapshot, getFirestore } from 'firebase/firestore';
-import { addIssues } from '../../Redux/Action';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { View, SafeAreaView, FlatList, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import app from '../../Authentication/Firebase/Config';
+import { getFirestore, query, collection, onSnapshot } from 'firebase/firestore';
+import { addIssues } from '../../Redux/Action';
+import { useDispatch, useSelector } from 'react-redux';
+import SingularCases from '../SingularCases';
+import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LawyerSingularCases from './LawyerSingularCase';
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'; 
-
 const LawyersMainFrame = () => {
     const db = getFirestore(app);
     const dispatch = useDispatch();
+    const insets = useSafeAreaInsets();
+    const [activeTab, setActiveTab] = useState('New Cases');
 
     useEffect(() => {
         const getCases = async () => {
@@ -18,8 +21,14 @@ const LawyersMainFrame = () => {
                 const issues = [];
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    console.log('Fetched case data:', data); 
-                    issues.push(data);
+                    issues.push({
+                        id: doc.id,
+                        caseName: data.caseName,
+                        phoneNumber: data.phoneNumber,
+                        email: data.email,
+                        whatsappNumber: data.whatsappNumber,
+                        ...data
+                    });
                 });
                 dispatch(addIssues(issues));
             });
@@ -29,6 +38,20 @@ const LawyersMainFrame = () => {
 
     const cases = useSelector((state) => state.Reducer1);
     const receivecases = cases.issues;
+
+    const renderContent = () => {
+        const filteredCases = receivecases.filter(caseItem => 
+            activeTab === 'New Cases' ? !caseItem.taken : caseItem.taken
+        );
+
+        return (
+            <FlatList
+                data={filteredCases}
+                renderItem={({ item }) => <LawyerSingularCases lawyer={item} />}
+                keyExtractor={(item) => item.id.toString()}
+            />
+        );
+    };
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
@@ -41,16 +64,20 @@ const LawyersMainFrame = () => {
                 <Text style={styles.infotext}>Press on the thumbs icon to show interest</Text>
                 <MaterialCommunityIcons name="arrow-collapse-left" size={20} color="white" />
             </View>
+            <View style={styles.tabsContainer}>
+                <TouchableOpacity
+                    style={[styles.tab, activeTab === 'New Cases' && styles.activeTab]}
+                    onPress={() => setActiveTab('New Cases')}>
+                    <Text style={[styles.tabText, activeTab === 'New Cases' && styles.activeTabText]}>New Cases</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.tab, activeTab === 'Taken Cases' && styles.activeTab]}
+                    onPress={() => setActiveTab('Taken Cases')}>
+                    <Text style={[styles.tabText, activeTab === 'Taken Cases' && styles.activeTabText]}>Taken Cases</Text>
+                </TouchableOpacity>
+            </View>
             <View style={styles.datadisplay}>
-                <FlatList
-                    data={receivecases}
-                    renderItem={({ item }) => (
-                        <LawyerSingularCases
-                            lawyer={item} 
-                        />
-                    )}
-                    keyExtractor={(item) => item.id.toString()}
-                />
+                {renderContent()}
             </View>
         </SafeAreaView>
     );
@@ -89,6 +116,28 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         padding: 5,
         fontSize: 13,
+    },
+    tabsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        paddingTop: 10,
+        backgroundColor: 'white',
+    },
+    tab: {
+        paddingVertical: 10,
+    },
+    tabText: {
+        fontSize: 19,
+        color: '#666',
+    },
+    activeTab: {
+        borderBottomWidth: 2,
+        borderBottomColor: 'black',
+
+    },
+    activeTabText: {
+        color: '#501B73',
     },
     datadisplay: {
         flex: 1,

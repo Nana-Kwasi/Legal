@@ -12,7 +12,7 @@ import store from './Redux/Store';
 import 'react-native-get-random-values';
 import LawyerRegistrationForm from './Components/Lawyers/LawyerRegistration';
 import { CasesProvider } from './Components/Civilian/CaseContext';
-
+ 
 
 
 

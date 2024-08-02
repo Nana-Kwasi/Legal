@@ -6,6 +6,9 @@ import LawyerActivity from './LawyerActivity';
 import LawyersMainFrame from './LawyersMainFrame';
 import Dashboard from './Dashboard';
 import Chat from './Chat';
+import CasesTabNavigator from './CasesTabNavigator';
+
+
 
 const LawyerBottomNav = () => {
 
