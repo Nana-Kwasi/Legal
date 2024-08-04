@@ -235,26 +235,173 @@
 // });
 
 // export default LawyerSingularCases;
+
+
+// import React, { useState, useEffect } from 'react';
+// import { View, Text, StyleSheet, TouchableOpacity, Alert, Linking } from 'react-native';
+// import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
+// import { useNavigation } from '@react-navigation/native';
+// import { getFirestore, doc, updateDoc } from 'firebase/firestore';
+// import app from '../../Authentication/Firebase/Config';
+
+// const LawyerSingularCases = ({ lawyer }) => {
+//     const { id, issues: caseName, phoneNumber, email, taken } = lawyer; // Add 'taken' field
+//     const [pressed, setPressed] = useState(false);
+//     const [backgroundColor, setBackgroundColor] = useState(getRandomColor());
+//     const navigation = useNavigation();
+//     const db = getFirestore(app);
+
+//     useEffect(() => {
+//         setBackgroundColor(getRandomColor());
+//     }, []);
+
+//     function getRandomColor() {
+//         const colors = ['#263238', '#4E342E', '#1B5E20', '#3E2723']; // Darker colors matching with white text
+//         return colors[Math.floor(Math.random() * colors.length)];
+//     }
+
+//     const handleThumbPress = () => {
+//         Alert.alert(
+//             "Confirmation",
+//             "Do you want to take on this case?",
+//             [
+//                 {
+//                     text: "No",
+//                     onPress: () => setPressed(false),
+//                     style: "cancel"
+//                 },
+//                 {
+//                     text: "Yes",
+//                     onPress: async () => {
+//                         setPressed(true);
+//                         navigation.navigate('Chat'); // Replace 'Chat' with your actual chat screen name
+//                         // Update Firestore document to mark the case as taken
+//                         const caseDocRef = doc(db, "Cases", id);
+//                         await updateDoc(caseDocRef, {
+//                             taken: true
+//                         });
+//                     }
+//                 }
+//             ],
+//             { cancelable: true }
+//         );
+//     };
+
+//     const handlePhonePress = () => {
+//         if (phoneNumber) {
+//             Linking.openURL(`tel:${phoneNumber}`);
+//         }
+//     };
+
+//     const handleEmailPress = () => {
+//         if (email) {
+//             Linking.openURL(`mailto:${email}`);
+//         }
+//     };
+
+//     const handleWhatsAppPress = () => {
+//         if (phoneNumber) {
+//             Linking.openURL(`whatsapp://send?phone=${phoneNumber}`);
+//         }
+//     };
+
+//     return (
+//         <View>
+//             <View style={[styles.card, { backgroundColor }]}>
+//                 <View style={styles.caseContent}>
+//                     <TouchableOpacity onPress={handleThumbPress} disabled={taken}>
+//                         <MaterialIcons name={pressed ? "thumb-up-alt" : "thumb-up-off-alt"} size={30} color="#fff" />
+//                     </TouchableOpacity>
+//                     <Text style={styles.caseText}>{caseName || "No case name available"}</Text>
+//                     {taken && <Text style={styles.takenText}>Taken</Text>}
+//                 </View>
+//                 <View style={styles.additionalInfo}></View>
+//                 <View style={styles.iconRow}>
+//                     <TouchableOpacity onPress={handlePhonePress}>
+//                         <MaterialIcons name="phone" size={24} color="#fff" style={styles.icon} />
+//                     </TouchableOpacity>
+//                     <TouchableOpacity onPress={handleEmailPress}>
+//                         <MaterialIcons name="email" size={24} color="#fff" style={styles.icon} />
+//                     </TouchableOpacity>
+//                     <TouchableOpacity onPress={handleWhatsAppPress}>
+//                         <FontAwesome name="whatsapp" size={24} color="#fff" style={styles.icon} />
+//                     </TouchableOpacity>
+//                 </View>
+//             </View>
+//         </View>
+//     );
+// };
+
+// const styles = StyleSheet.create({
+//     card: {
+//         margin: 10,
+//         padding: 15,
+//         flexDirection: 'column',
+//         alignItems: 'flex-start',
+//         justifyContent: 'flex-start',
+//         borderRadius: 10,
+//     },
+//     caseContent: {
+//         flexDirection: 'row',
+//         alignItems: 'center',
+//     },
+//     caseText: {
+//         color: '#fff',
+//         fontSize: 16,
+//         marginLeft: 10,
+//         flex: 1,
+//     },
+//     takenText: {
+//         color: 'white', 
+//         fontSize: 40,
+//         marginLeft: 10,
+//     },
+//     additionalInfo: {
+//         flexDirection: 'column',
+//         alignItems: 'flex-start',
+//         marginTop: 10,
+//     },
+//     infoText: {
+//         color: '#fff',
+//         fontSize: 14,
+//         marginLeft: 5,
+//     },
+//     iconRow: {
+//         flexDirection: 'row',
+//         justifyContent: 'space-between',
+//         marginTop: 10,
+//         width: '50%',
+//     },
+//     icon: {
+//         marginHorizontal: 10,
+//     },
+// });
+
+// export default LawyerSingularCases;
+
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Linking } from 'react-native';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 import app from '../../Authentication/Firebase/Config';
+import { useCases } from '../Civilian/CaseContext';
 
 const LawyerSingularCases = ({ lawyer }) => {
-    const { id, issues: caseName, phoneNumber, email, taken } = lawyer; // Add 'taken' field
+    const { id, issues: caseName, phoneNumber, email, taken } = lawyer;
     const [pressed, setPressed] = useState(false);
     const [backgroundColor, setBackgroundColor] = useState(getRandomColor());
     const navigation = useNavigation();
     const db = getFirestore(app);
+    const { addLawyerCase, cases, setCases } = useCases();
 
     useEffect(() => {
         setBackgroundColor(getRandomColor());
     }, []);
 
     function getRandomColor() {
-        const colors = ['#263238', '#4E342E', '#1B5E20', '#3E2723']; // Darker colors matching with white text
+        const colors = ['#263238', '#4E342E', '#1B5E20', '#3E2723'];
         return colors[Math.floor(Math.random() * colors.length)];
     }
 
@@ -272,12 +419,15 @@ const LawyerSingularCases = ({ lawyer }) => {
                     text: "Yes",
                     onPress: async () => {
                         setPressed(true);
-                        navigation.navigate('Chat'); // Replace 'Chat' with your actual chat screen name
-                        // Update Firestore document to mark the case as taken
                         const caseDocRef = doc(db, "Cases", id);
                         await updateDoc(caseDocRef, {
                             taken: true
                         });
+                        addLawyerCase(id);
+                        setCases(prevCases => 
+                            prevCases.map(c => c.id === id ? { ...c, taken: true } : c)
+                        );
+                        navigation.navigate('Chat');
                     }
                 }
             ],
@@ -350,7 +500,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     takenText: {
-        color: '#ff0000', 
+        color: 'white',
         fontSize: 40,
         marginLeft: 10,
     },

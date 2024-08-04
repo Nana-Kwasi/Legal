@@ -12,8 +12,8 @@ import store from './Redux/Store';
 import 'react-native-get-random-values';
 import LawyerRegistrationForm from './Components/Lawyers/LawyerRegistration';
 import { CasesProvider } from './Components/Civilian/CaseContext';
- 
-
+import MyCases from './Components/Lawyers/MyCases';
+import MyClients from './Components/Lawyers/MyClients';
 
 
 
@@ -24,7 +24,7 @@ const App = () => {
   return (
 
     <Provider store={store}>
-      <CasesProvider>
+      <CasesProvider> 
     <NavigationContainer >
         <Starks.Navigator screenOptions={{header:()=>null, presentation:'transparentModal', animationTypeForReplace:'pop'}}>
             <Starks.Screen name='Home' component={Home} />
@@ -34,6 +34,8 @@ const App = () => {
             <Starks.Screen name='CivilianBottomNav' component={CivilianBottomNav} />
             <Starks.Screen name='LawyerBottomNav' component={LawyerBottomNav} />
             <Starks.Screen name='LawyerRegistration' component={LawyerRegistrationForm} />
+            <Starks.Screen name='MyClients' component={MyClients} />
+            <Starks.Screen name='MyCases' component={MyCases} />
 
         </Starks.Navigator>
     </NavigationContainer>

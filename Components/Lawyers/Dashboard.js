@@ -1,16 +1,20 @@
+// Dashboard.js
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 const Dashboard = () => {
+    const navigation = useNavigation();
+
     return (
         <View style={styles.container}>
             <View style={styles.row}>
-                <TouchableOpacity style={[styles.card, styles.shadow]}>
+                <TouchableOpacity style={[styles.card, styles.shadow]} onPress={() => navigation.navigate('MyClients')}>
                     <Feather name="user" size={30} color="white" />
                     <Text style={styles.cardText}>My Clients</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.card, styles.shadow]}>
+                <TouchableOpacity style={[styles.card, styles.shadow]} onPress={() => navigation.navigate('MyCases')}>
                     <Feather name="briefcase" size={30} color="white" />
                     <Text style={styles.cardText}>My Cases</Text>
                 </TouchableOpacity>
