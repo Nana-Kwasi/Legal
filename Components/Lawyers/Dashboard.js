@@ -1,42 +1,37 @@
-// Dashboard.js
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { getAuth, signOut } from "firebase/auth";
+import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import app from '../../Authentication/Firebase/Config';
 
 const Dashboard = () => {
     const navigation = useNavigation();
+    const auth = getAuth(app);
 
     return (
         <View style={styles.container}>
+             <View style={styles.header}>
+               
+                <View style={styles.profileSection}>
+                    <Image source={require('../../assets/profile.png')} style={styles.icon1} />
+                    <Text style={styles.email}>{auth.currentUser?.email}</Text>
+                </View>
+            </View>
             <View style={styles.row}>
-                <TouchableOpacity style={[styles.card, styles.shadow]} onPress={() => navigation.navigate('MyClients')}>
-                    <Feather name="user" size={30} color="white" />
-                    <Text style={styles.cardText}>My Clients</Text>
+                <TouchableOpacity style={[styles.iconContainer, styles.shadow]} onPress={() => navigation.navigate('MyClients')}>
+                    <Image source={require('../../assets/service.png')} style={styles.icon} />
+                    <Text style={styles.iconText}>My Clients</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.card, styles.shadow]} onPress={() => navigation.navigate('MyCases')}>
-                    <Feather name="briefcase" size={30} color="white" />
-                    <Text style={styles.cardText}>My Cases</Text>
+                <TouchableOpacity style={[styles.iconContainer, styles.shadow]} onPress={() => navigation.navigate('MyCases')}>
+                    <Image source={require('../../assets/job.png')} style={styles.icon} />
+                    <Text style={styles.iconText}>My Cases</Text>
                 </TouchableOpacity>
             </View>
             <View style={styles.row}>
-                <TouchableOpacity style={[styles.card, styles.shadow]}>
-                    <Feather name="book" size={30} color="white" />
-                    <Text style={styles.cardText}>My Library</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.card, styles.shadow]}>
-                    <Feather name="calendar" size={30} color="white" />
-                    <Text style={styles.cardText}>Appointment</Text>
-                </TouchableOpacity>
-            </View>
-            <View style={styles.row}>
-                <TouchableOpacity style={[styles.card, styles.shadow]}>
-                    <Feather name="settings" size={30} color="white" />
-                    <Text style={styles.cardText}>Settings</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.card, styles.shadow]}>
-                    <Feather name="file-text" size={30} color="white" />
-                    <Text style={styles.cardText}>New Cases</Text>
+                <TouchableOpacity style={[styles.iconContainer, styles.shadow]} onPress={() => navigation.navigate('LawyersMainFrame')}>
+                    <Image source={require('../../assets/new.png')} style={styles.icon} />
+                    <Text style={styles.iconText}>New Cases</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -46,42 +41,65 @@ const Dashboard = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#b6d5eb',
+        backgroundColor: 'white',
         padding: 20,
+        justifyContent: 'center', // Center content vertically
+    },
+    email: {
+        fontSize: 15,
+        fontWeight: '400',
+        color: '#243035',
+        fontFamily: 'KohinoorTelugu-Medium',
+        marginTop: 8, 
+        textAlign: 'center',
+        marginRight:250
+ 
+
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'center', 
+        alignItems: 'center',
+        padding: 10,
+        backgroundColor: '#ffffff',
     },
     row: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'space-around', 
+        marginBottom: 40, 
     },
-    card: {
-        flex: 1,
-        backgroundColor: '#008282',
+    iconContainer: {
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: 16,
-        borderRadius: 10,
-        marginHorizontal: 8,
-        marginTop: 40,
-        height: 150,
-        borderWidth: 1,
-        borderColor: '#3a3a3c'
     },
-    cardText: {
-        color: 'white',
+    icon: {
+        width: 100,
+        height: 100,
+    },
+    icon1: {
+        width: 70,
+        height: 70,
+        marginRight:250
+    },
+    iconText: {
         marginTop: 8,
         fontSize: 18,
         fontWeight: '600',
+        color: 'black',
+    },
+    profileSection: {
+        alignItems: 'center',
+        marginBottom: 120,
     },
     shadow: {
         ...Platform.select({
             ios: {
                 shadowColor: '#000',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.9,
-                shadowRadius: 5,
+                shadowOffset: { width: 0, height: 5 },
+                shadowOpacity: 0.2,
+                shadowRadius: 0.5,
             },
             android: {
-                elevation: 10,
+                elevation: 2,
             },
         }),
     },

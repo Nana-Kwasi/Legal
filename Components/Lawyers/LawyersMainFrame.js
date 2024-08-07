@@ -8,6 +8,13 @@ import SingularCases from '../SingularCases';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LawyerSingularCases from './LawyerSingularCase';
+
+
+
+
+
+
+
 const LawyersMainFrame = () => {
     const db = getFirestore(app);
     const dispatch = useDispatch();

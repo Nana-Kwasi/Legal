@@ -379,8 +379,7 @@
 
 // export default LawyerSingularCases;
 
-
-import React, { useState, useEffect } from 'react';
+ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Linking } from 'react-native';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -389,15 +388,15 @@ import app from '../../Authentication/Firebase/Config';
 import { useCases } from '../Civilian/CaseContext';
 
 const LawyerSingularCases = ({ lawyer }) => {
-    const { id, issues: caseName, phoneNumber, email, taken } = lawyer;
+    const { id, issues: caseName, phoneNumber, email, taken, date, time } = lawyer;
     const [pressed, setPressed] = useState(false);
-    const [backgroundColor, setBackgroundColor] = useState(getRandomColor());
+    const [textColor, setTextColor] = useState(getRandomColor());
     const navigation = useNavigation();
     const db = getFirestore(app);
     const { addLawyerCase, cases, setCases } = useCases();
 
     useEffect(() => {
-        setBackgroundColor(getRandomColor());
+        setTextColor(getRandomColor());
     }, []);
 
     function getRandomColor() {
@@ -421,11 +420,12 @@ const LawyerSingularCases = ({ lawyer }) => {
                         setPressed(true);
                         const caseDocRef = doc(db, "Cases", id);
                         await updateDoc(caseDocRef, {
-                            taken: true
+                            taken: true,
+                            lawyerId: lawyer.id // Assuming `lawyer.id` is available in props
                         });
                         addLawyerCase(id);
-                        setCases(prevCases => 
-                            prevCases.map(c => c.id === id ? { ...c, taken: true } : c)
+                        setCases(prevCases =>
+                            prevCases.map(c => c.id === id ? { ...c, taken: true, lawyerId: lawyer.id } : c)
                         );
                         navigation.navigate('Chat');
                     }
@@ -434,6 +434,7 @@ const LawyerSingularCases = ({ lawyer }) => {
             { cancelable: true }
         );
     };
+    
 
     const handlePhonePress = () => {
         if (phoneNumber) {
@@ -455,25 +456,30 @@ const LawyerSingularCases = ({ lawyer }) => {
 
     return (
         <View>
-            <View style={[styles.card, { backgroundColor }]}>
+            <View style={styles.card}>
                 <View style={styles.caseContent}>
                     <TouchableOpacity onPress={handleThumbPress} disabled={taken}>
-                        <MaterialIcons name={pressed ? "thumb-up-alt" : "thumb-up-off-alt"} size={30} color="#fff" />
+                        <MaterialIcons name={pressed ? "thumb-up-alt" : "thumb-up-off-alt"} size={30} color="#000" />
                     </TouchableOpacity>
-                    <Text style={styles.caseText}>{caseName || "No case name available"}</Text>
-                    {taken && <Text style={styles.takenText}>Taken</Text>}
+                    <Text style={[styles.caseText, { color: textColor }]}>{caseName || "No case name available"}</Text>
                 </View>
-                <View style={styles.additionalInfo}></View>
-                <View style={styles.iconRow}>
-                    <TouchableOpacity onPress={handlePhonePress}>
-                        <MaterialIcons name="phone" size={24} color="#fff" style={styles.icon} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handleEmailPress}>
-                        <MaterialIcons name="email" size={24} color="#fff" style={styles.icon} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handleWhatsAppPress}>
-                        <FontAwesome name="whatsapp" size={24} color="#fff" style={styles.icon} />
-                    </TouchableOpacity>
+                {!taken && (
+                    <View style={styles.iconRow}>
+                        <TouchableOpacity onPress={handlePhonePress}>
+                            <MaterialIcons name="phone" size={22} color="#000" style={styles.icon} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={handleEmailPress}>
+                            <MaterialIcons name="email" size={22} color="#000" style={styles.icon} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={handleWhatsAppPress}>
+                            <FontAwesome name="whatsapp" size={22} color="#000" style={styles.icon} />
+                        </TouchableOpacity>
+                    </View>
+                )}
+                {taken && <Text style={styles.takenText}>Taken</Text>}
+                <View style={styles.additionalInfo}>
+                    <Text style={styles.infoText}>{date}</Text>
+                    <Text style={styles.infoText}>{time}</Text>
                 </View>
             </View>
         </View>
@@ -488,40 +494,41 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         justifyContent: 'flex-start',
         borderRadius: 10,
+        backgroundColor: '#fff',
+        elevation: 20,
     },
     caseContent: {
         flexDirection: 'row',
         alignItems: 'center',
     },
     caseText: {
-        color: '#fff',
-        fontSize: 16,
-        marginLeft: 10,
+        fontSize: 15,
+        marginLeft: 15,
+        marginRight: 15,
         flex: 1,
     },
     takenText: {
-        color: 'white',
-        fontSize: 40,
-        marginLeft: 10,
-    },
-    additionalInfo: {
-        flexDirection: 'column',
-        alignItems: 'flex-start',
+        color: 'black',
+        fontSize: 30,
         marginTop: 10,
     },
+    additionalInfo: {
+        flexDirection: 'row',
+        marginTop: 5,
+    },
     infoText: {
-        color: '#fff',
-        fontSize: 14,
-        marginLeft: 5,
+        color: '#000',
+        fontSize: 15,
+        marginLeft: 10,
     },
     iconRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginTop: 10,
-        width: '50%',
+        width: '100%',
     },
     icon: {
-        marginHorizontal: 10,
+        marginHorizontal: 50,
     },
 });
 

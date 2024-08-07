@@ -110,14 +110,13 @@
 
 // export default PenComponent;
 
- import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, ScrollView, KeyboardAvoidingView, TextInput, StyleSheet, Text, Platform, TouchableWithoutFeedback, Keyboard, TouchableOpacity, Alert, Animated, Easing } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { v4 as uuidv4 } from "uuid";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import app from '../../Authentication/Firebase/Config';
 import { useCases } from './CaseContext';
-
 
 const PenComponent = ({ navigation }) => {
     const db = getFirestore(app);
@@ -127,7 +126,7 @@ const PenComponent = ({ navigation }) => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [email, setEmail] = useState('');
     const [isSpinning, setIsSpinning] = useState(false);
-    const { addCase } = useCases(); // Use the custom hook
+    const { addCase } = useCases();
 
     const spinValue = useRef(new Animated.Value(0)).current;
 
@@ -155,26 +154,37 @@ const PenComponent = ({ navigation }) => {
         }]
     };
 
+    const getCurrentDateTime = () => {
+        const now = new Date();
+        const date = now.toLocaleDateString();
+        const time = now.toLocaleTimeString();
+        return { date, time };
+    };
+
     const handleIssues = async () => {
         if (!phoneNumber || !email) {
             Alert.alert('Error', 'Please fill in the phone number and email fields before posting a case.');
             return;
         }
 
-        spin(); 
+        spin();
+
+        const { date, time } = getCurrentDateTime();
 
         const newIssue = {
             issues: issues,
             id: uuidv4(),
             phoneNumber: phoneNumber,
-            email: email
+            email: email,
+            date: date,
+            time: time
         };
 
         console.log(newIssue);
 
         try {
             await setDoc(doc(db, "Cases", newIssue.id), newIssue);
-            addCase(newIssue); // Add the new issue to the context
+            addCase(newIssue);
         } catch (error) {
             console.log(error);
         }
@@ -183,7 +193,7 @@ const PenComponent = ({ navigation }) => {
         setPhoneNumber('');
         setEmail('');
         setTimeout(() => {
-            setIsSpinning(false); // Stop spinning animation after a delay
+            setIsSpinning(false);
             // navigation.navigate('Home');
         }, 1000);
     };
@@ -310,6 +320,5 @@ const styles = StyleSheet.create({
 });
 
 export default PenComponent;
-
 
 

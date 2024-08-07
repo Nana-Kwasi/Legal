@@ -87,10 +87,14 @@ export const CasesProvider = ({ children }) => {
         try {
             const savedLawyerCases = await AsyncStorage.getItem('@lawyerCases');
             if (savedLawyerCases !== null) {
-                setLawyerCases(JSON.parse(savedLawyerCases));
+                const parsedLawyerCases = JSON.parse(savedLawyerCases);
+                setLawyerCases(Array.isArray(parsedLawyerCases) ? parsedLawyerCases : []);
+            } else {
+                setLawyerCases([]); // Ensure lawyerCases is an empty array if not found
             }
         } catch (error) {
             console.error('Error loading lawyer cases data:', error.message);
+            setLawyerCases([]); // Ensure lawyerCases is an empty array in case of error
         }
     };
 

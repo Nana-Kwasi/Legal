@@ -14,7 +14,7 @@ import LawyerRegistrationForm from './Components/Lawyers/LawyerRegistration';
 import { CasesProvider } from './Components/Civilian/CaseContext';
 import MyCases from './Components/Lawyers/MyCases';
 import MyClients from './Components/Lawyers/MyClients';
-
+import ProfileScreen from './Components/Lawyers/ProfileScreen';
 
 
 const App = () => {
@@ -36,6 +36,8 @@ const App = () => {
             <Starks.Screen name='LawyerRegistration' component={LawyerRegistrationForm} />
             <Starks.Screen name='MyClients' component={MyClients} />
             <Starks.Screen name='MyCases' component={MyCases} />
+            <Starks.Screen name='ProfileScreen' component={ProfileScreen} />
+
 
         </Starks.Navigator>
     </NavigationContainer>
