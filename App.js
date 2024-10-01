@@ -15,6 +15,8 @@ import { CasesProvider } from './Components/Civilian/CaseContext';
 import MyCases from './Components/Lawyers/MyCases';
 import MyClients from './Components/Lawyers/MyClients';
 import ProfileScreen from './Components/Lawyers/ProfileScreen';
+import CivilianProfile from './Components/Civilian/CivilianProfile';
+import WelcomeScreen from './Pages/Welcome';
 
 
 const App = () => {
@@ -27,6 +29,7 @@ const App = () => {
       <CasesProvider> 
     <NavigationContainer >
         <Starks.Navigator screenOptions={{header:()=>null, presentation:'transparentModal', animationTypeForReplace:'pop'}}>
+        <Starks.Screen name='Welcome' component={WelcomeScreen} />
             <Starks.Screen name='Home' component={Home} />
             <Starks.Screen name='Register' component={Register} />
             <Starks.Screen name='LogIn' component={LogIn} />
@@ -37,6 +40,7 @@ const App = () => {
             <Starks.Screen name='MyClients' component={MyClients} />
             <Starks.Screen name='MyCases' component={MyCases} />
             <Starks.Screen name='ProfileScreen' component={ProfileScreen} />
+            <Starks.Screen name='CivilianProfile' component={CivilianProfile} />
 
 
         </Starks.Navigator>

@@ -61,11 +61,11 @@ const LawyerRegistrationForm = ({ navigation }) => {
             Alert.alert('Error', Object.values(errorMessages).join('\n'));
             return;
         }
-        if (!nameRegex.test(username)) {
+        if (!nameRegex.test(fullName)) {  // Replace 'username' with 'fullName'
             alert('Please enter a valid full name with first and last name.');
             return;
         }
-
+    
         if (!passwordRegex.test(password)) {
             alert('Password must include at least one special character.');
             return;

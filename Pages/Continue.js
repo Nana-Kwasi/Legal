@@ -5,44 +5,77 @@ import { Fontisto, Ionicons } from '@expo/vector-icons';
 import legalback from '../assets/legalback.jpg';
 import LottieView from 'lottie-react-native';
 import rounded from '../assets/rounded.json';
+import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import app from '../Authentication/Firebase/Config';
 
-const Continue = ({ navigation }) => {
+const Continue = ({ navigation, route }) => {
     const [modalVisible, setModalVisible] = useState(false);
     const [licenseNumber, setLicenseNumber] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState('We Are verifying');
     const progress = useRef(new Animated.Value(0)).current;
+    const db = getFirestore(app);
+
+    // Get role from route params or AsyncStorage
+    const role = route.params?.role || '';
+
+    useEffect(() => {
+        const fetchRole = async () => {
+            try {
+                const storedRole = await AsyncStorage.getItem('Role');
+                if (storedRole) {
+                    role = storedRole;
+                }
+            } catch (error) {
+                console.error('Error fetching role:', error);
+            }
+        };
+
+        if (!role) {
+            fetchRole();
+        }
+    }, [role]);
 
     useEffect(() => {
         if (isLoading) {
-            let messageTimeouts = [
-                setTimeout(() => setLoadingMessage('We are almost done'), 1000),
-                setTimeout(() => setLoadingMessage('Here you go,Thank you for your time'), 1000)
-            ];
+            const fetchData = async () => {
+                try {
+                    const q = query(collection(db, "Lawyer"), where("licenseNumber", "==", licenseNumber));
+                    const querySnapshot = await getDocs(q);
 
-            let loadingTimeout = setTimeout(() => {
-                const correctLicenseNumber = '123456';
-                setIsLoading(false);
-                if (licenseNumber === correctLicenseNumber) {
-                    setModalVisible(false);
-                    navigation.navigate('LawyerBottomNav');
-                } else {
-                    Alert.alert('Error', 'Invalid license number. Please try again.');
+                    if (!querySnapshot.empty) {
+                        querySnapshot.forEach((doc) => {
+                            const lawyerData = doc.data();
+                            setLoadingMessage(`Verifying Lawyer: ${lawyerData.fullName}\nBar Association: ${lawyerData.barAssociation}`);
+                        });
+
+                        // Extend delay to 4 seconds for better visibility
+                        setTimeout(() => {
+                            setModalVisible(false);
+                            navigation.navigate('LawyerBottomNav');
+                        }, 4000);
+                    } else {
+                        Alert.alert('Error', 'Invalid license number. Please try again.');
+                        setIsLoading(false);
+                    }
+                } catch (error) {
+                    console.error("Error verifying license number:", error);
+                    Alert.alert('Error', 'An error occurred while verifying the license number. Please try again.');
+                    setIsLoading(false);
                 }
-            }, 30000);
-
-            return () => {
-                messageTimeouts.forEach(timeout => clearTimeout(timeout));
-                clearTimeout(loadingTimeout);
             };
+
+            fetchData();
         }
-    }, [isLoading, licenseNumber, navigation]);
+    }, [isLoading, licenseNumber, navigation, db]);
 
     const verifyLicenseNumber = () => {
         setIsLoading(true);
+        setLoadingMessage('We Are verifying your information, please wait...'); // Reset loading message when starting verification
         Animated.timing(progress, {
             toValue: 1,
-            duration: 30000,
+            duration: 4000,
             useNativeDriver: true,
         }).start();
     };
@@ -61,17 +94,21 @@ const Continue = ({ navigation }) => {
                     <View style={styles.continue}>
                         <View style={styles.continuetext}>
                             <Text style={styles.hello}>Hello!</Text>
-                            <Text style={styles.wish}>Do you wish to continue as</Text>
+                            <Text style={styles.wish}>Continue as</Text>
                         </View>
                         <View style={styles.continuechoice}>
-                            <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.continuebtn}>
-                                <Fontisto name="person" size={30} color="white" />
-                                <Text style={styles.btnchoice}>A LAWYER</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => navigation.navigate('CivilianBottomNav')} style={styles.continuebtn}>
-                                <Ionicons name="person-outline" size={30} color="white" />
-                                <Text style={styles.btnchoice}>A CIVILIAN</Text>
-                            </TouchableOpacity>
+                            {role !== 'Civilian' && (
+                                <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.continuebtn}>
+                                    <Fontisto name="person" size={30} color="white" />
+                                    <Text style={styles.btnchoice}>A LAWYER</Text>
+                                </TouchableOpacity>
+                            )}
+                            {role !== 'Lawyer' && (
+                                <TouchableOpacity onPress={() => navigation.navigate('CivilianBottomNav')} style={styles.continuebtn}>
+                                    <Ionicons name="person-outline" size={30} color="white" />
+                                    <Text style={styles.btnchoice}>A CIVILIAN</Text>
+                                </TouchableOpacity>
+                            )}
                         </View>
                     </View>
                 </ScrollView>
@@ -117,7 +154,9 @@ const Continue = ({ navigation }) => {
             </Modal>
         </SafeAreaView>
     );
-}
+};
+
+
 
 const styles = StyleSheet.create({
     maincontinue: {

@@ -303,6 +303,8 @@ const MyClients = () => {
                         <View style={styles.cardContent}>
                             <Ionicons name="person-circle-outline" size={60} color="#333" style={styles.profileIcon} />
                             <Text style={styles.caseDetails}>{item.email}</Text>
+                            <Text style={styles.caseTitle}>{item.issues}</Text>
+
                         </View>
                         <View style={styles.iconRow}>
                             <TouchableOpacity onPress={() => handleContactPress('phone', item.phoneNumber)}>
@@ -342,7 +344,7 @@ const styles = StyleSheet.create({
     },
     caseDetails: {
         fontSize: 16,
-        color: '#666',
+        color: 'red',
         fontWeight: 'bold',
         marginTop: 10,
     },

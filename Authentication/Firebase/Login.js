@@ -9,9 +9,9 @@ import LottieView from 'lottie-react-native';
 import rounded from '../../assets/rounded.json';
 
 const LogIn = ({ navigation }) => {
-
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [role, setRole] = useState('');  // New state to track the selected role
     const auth = getAuth(app);
     const progress = useRef(new Animated.Value(0)).current;
     const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -22,8 +22,31 @@ const LogIn = ({ navigation }) => {
             const userCredentials = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredentials.user;
             console.log('Logged In with:', user.email);
-            navigation.navigate('Continue');
-            await AsyncStorage.setItem('MyEmail', email);
+
+            // Prompt user to choose role
+            Alert.alert(
+                "Choose Role",
+                "Do you want to continue as a Lawyer or a Civilian?",
+                [
+                    {
+                        text: "Lawyer",
+                        onPress: async () => {
+                            setRole('Lawyer');
+                            await AsyncStorage.setItem('Role', 'Lawyer');
+                            navigation.navigate('Continue', { role: 'Lawyer' });
+                        },
+                    },
+                    {
+                        text: "Civilian",
+                        onPress: async () => {
+                            setRole('Civilian');
+                            await AsyncStorage.setItem('Role', 'Civilian');
+                            navigation.navigate('Continue', { role: 'Civilian' });
+                        },
+                    },
+                ],
+                { cancelable: false }
+            );
         } catch (error) {
             Alert.alert('Error', 'Invalid email or password. Please try again.');
         } finally {
@@ -100,6 +123,8 @@ const LogIn = ({ navigation }) => {
         </SafeAreaView>
     );
 };
+
+
 
 const styles = StyleSheet.create({
     log: {

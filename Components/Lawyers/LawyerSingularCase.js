@@ -379,7 +379,10 @@
 
 // export default LawyerSingularCases;
 
- import React, { useState, useEffect } from 'react';
+
+
+
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Linking } from 'react-native';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -387,8 +390,9 @@ import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 import app from '../../Authentication/Firebase/Config';
 import { useCases } from '../Civilian/CaseContext';
 
+
 const LawyerSingularCases = ({ lawyer }) => {
-    const { id, issues: caseName, phoneNumber, email, taken, date, time } = lawyer;
+    const { id, issues: caseName, phoneNumber, email, taken, date, time, fileName, fileUri } = lawyer; // Destructure fileName and fileUri
     const [pressed, setPressed] = useState(false);
     const [textColor, setTextColor] = useState(getRandomColor());
     const navigation = useNavigation();
@@ -427,14 +431,13 @@ const LawyerSingularCases = ({ lawyer }) => {
                         setCases(prevCases =>
                             prevCases.map(c => c.id === id ? { ...c, taken: true, lawyerId: lawyer.id } : c)
                         );
-                        navigation.navigate('Chat');
+                        // navigation.navigate('Chat');
                     }
                 }
             ],
             { cancelable: true }
         );
     };
-    
 
     const handlePhonePress = () => {
         if (phoneNumber) {
@@ -451,6 +454,15 @@ const LawyerSingularCases = ({ lawyer }) => {
     const handleWhatsAppPress = () => {
         if (phoneNumber) {
             Linking.openURL(`whatsapp://send?phone=${phoneNumber}`);
+        }
+    };
+    const handleFilePress = async () => {
+        try {
+            if (fileUri) {
+                await FileViewer.open(fileUri);
+            }
+        } catch (error) {
+            console.error("Error opening file:", error);
         }
     };
 
@@ -481,10 +493,19 @@ const LawyerSingularCases = ({ lawyer }) => {
                     <Text style={styles.infoText}>{date}</Text>
                     <Text style={styles.infoText}>{time}</Text>
                 </View>
+                {fileName && (
+                    <View style={styles.fileInfo}>
+                        <Text style={styles.fileText}>File: {fileName}</Text>
+                        <TouchableOpacity onPress={handleFilePress}>
+                            <Text style={styles.fileLink}>Open File</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
             </View>
         </View>
     );
 };
+
 
 const styles = StyleSheet.create({
     card: {
@@ -529,6 +550,22 @@ const styles = StyleSheet.create({
     },
     icon: {
         marginHorizontal: 50,
+    },
+    fileInfo: {
+        marginTop: 10,
+        borderTopWidth: 1,
+        borderTopColor: '#ccc',
+        paddingTop: 10,
+    },
+    fileText: {
+        fontSize: 14,
+        color: '#333',
+    },
+    fileLink: {
+        fontSize: 14,
+        color: '#007bff',
+        textDecorationLine: 'underline',
+        marginTop: 5,
     },
 });
 

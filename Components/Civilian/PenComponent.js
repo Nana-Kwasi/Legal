@@ -110,13 +110,15 @@
 
 // export default PenComponent;
 
-import React, { useState, useRef } from 'react';
+ import React, { useState, useRef } from 'react';
 import { View, ScrollView, KeyboardAvoidingView, TextInput, StyleSheet, Text, Platform, TouchableWithoutFeedback, Keyboard, TouchableOpacity, Alert, Animated, Easing } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { v4 as uuidv4 } from "uuid";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
+import * as DocumentPicker from 'expo-document-picker'; // Import DocumentPicker
 import app from '../../Authentication/Firebase/Config';
 import { useCases } from './CaseContext';
+
 
 const PenComponent = ({ navigation }) => {
     const db = getFirestore(app);
@@ -126,6 +128,7 @@ const PenComponent = ({ navigation }) => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [email, setEmail] = useState('');
     const [isSpinning, setIsSpinning] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null); // State to store the selected file
     const { addCase } = useCases();
 
     const spinValue = useRef(new Animated.Value(0)).current;
@@ -161,40 +164,75 @@ const PenComponent = ({ navigation }) => {
         return { date, time };
     };
 
+    const pickDocument = async () => {
+        try {
+            let result = await DocumentPicker.getDocumentAsync({});
+            console.log('Document Picker Result:', result); 
+    
+            if (result.type === 'success' || (result.assets && result.assets.length > 0)) {
+                const file = result.assets ? result.assets[0] : result;
+                setSelectedFile(file);
+                console.log('Selected File:', file.name);
+            } else {
+                console.log('Document Picker Cancelled or Failed'); 
+            }
+        } catch (error) {
+            console.error('Error picking document:', error); 
+        }
+    };
+    
     const handleIssues = async () => {
         if (!phoneNumber || !email) {
             Alert.alert('Error', 'Please fill in the phone number and email fields before posting a case.');
             return;
         }
-
+    
         spin();
-
+    
         const { date, time } = getCurrentDateTime();
-
+    
+        let fileUrl = null;
+    
+        if (selectedFile) {
+            const uploadUri = selectedFile.uri;
+            const fileName = selectedFile.name;
+            const reference = storage().ref(`documents/${fileName}`);
+            
+            try {
+                await reference.putFile(uploadUri);
+                fileUrl = await reference.getDownloadURL();
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                return;
+            }
+        }
+    
         const newIssue = {
             issues: issues,
             id: uuidv4(),
             phoneNumber: phoneNumber,
             email: email,
             date: date,
-            time: time
+            time: time,
+            fileName: selectedFile?.name || null,
+            fileUri: fileUrl,   // Store the file's download URL
         };
-
+        
         console.log(newIssue);
-
+    
         try {
             await setDoc(doc(db, "Cases", newIssue.id), newIssue);
             addCase(newIssue);
         } catch (error) {
             console.log(error);
         }
-
+    
         setIssues('');
         setPhoneNumber('');
         setEmail('');
+        setSelectedFile(null);
         setTimeout(() => {
             setIsSpinning(false);
-            // navigation.navigate('Home');
         }, 1000);
     };
 
@@ -242,6 +280,9 @@ const PenComponent = ({ navigation }) => {
                                 style={styles.textInput}
                             />
                         </View>
+                        <TouchableOpacity onPress={pickDocument} style={styles.fileInputContainer}>
+                     <Text style={styles.fileInputText}>{selectedFile ? selectedFile.name : 'Upload File'}</Text>
+                       </TouchableOpacity>
                     </ScrollView>
                     <TouchableOpacity onPress={handleIssues} style={styles.btnContainer}>
                         <Animated.View style={[styles.button, isSpinning && spinStyle]}>
@@ -253,6 +294,7 @@ const PenComponent = ({ navigation }) => {
         </KeyboardAvoidingView>
     );
 };
+
 
 const styles = StyleSheet.create({
     container: {
@@ -317,6 +359,11 @@ const styles = StyleSheet.create({
         height: 60,
         borderRadius: 30,
     },
+    fileInputText:{
+        color:'white',
+        fontSize:20,
+        fontWeight:'bold'
+    }
 });
 
 export default PenComponent;

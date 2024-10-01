@@ -1,45 +1,124 @@
-import React from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
 import { useCases } from '../Civilian/CaseContext';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { BarChart, PieChart } from 'react-native-chart-kit';
+import moment from 'moment';
 
 const MyCases = () => {
-    const { lawyerCases = [], cases } = useCases(); // Default to an empty array if lawyerCases is undefined
+    const { lawyerCases = [], cases } = useCases(); 
     const navigation = useNavigation();
 
-    // Ensure lawyerCases is an array before calling map
-    const takenCases = Array.isArray(lawyerCases) ? lawyerCases.map(caseId =>
-        cases.find(c => c.id === caseId)
-    ).filter(Boolean) : [];
+    // Parse dates and group cases by month
+    const casesByMonth = useMemo(() => {
+        const casesByMonth = {};
+        lawyerCases.forEach(caseId => {
+            const foundCase = cases.find(c => c.id === caseId);
+            if (foundCase) {
+                const month = moment(foundCase.date, 'DD/MM/YYYY').format('MMMM');
+                if (!casesByMonth[month]) {
+                    casesByMonth[month] = 0;
+                }
+                casesByMonth[month] += 1;
+            }
+        });
+        return casesByMonth;
+    }, [lawyerCases, cases]);
+
+    // Data for BarChart and PieChart
+    const barChartData = {
+        labels: Object.keys(casesByMonth),
+        datasets: [
+            {
+                data: Object.values(casesByMonth),
+            },
+        ],
+    };
+
+    const pieChartData = Object.keys(casesByMonth).map((month, index) => ({
+        name: month,
+        population: casesByMonth[month],
+        color: ['#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f', '#888', '#f90', '#09f', '#90f', '#9f0', '#f09'][index % 12],
+        legendFontColor: '#7F7F7F',
+        legendFontSize: 15,
+    }));
 
     return (
-        <View style={styles.container}>
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                <MaterialIcons name="arrow-back" size={34} color="#000" />
-            </TouchableOpacity>
-            <Text style={styles.backButtonText}>YOUR CASES</Text>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <View style={styles.container}>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                    <MaterialIcons name="arrow-back" size={34} color="#000" />
+                </TouchableOpacity>
+                <Text style={styles.backButtonText}>YOUR CASES</Text>
 
-            <FlatList
-                data={takenCases}
-                keyExtractor={item => item.id}
-                renderItem={({ item }) => (
-                    <View style={styles.caseCard}>
-                        <Text style={styles.caseTitle}>{item.issues}</Text>
-                        <Text style={styles.caseDetails}>{item.taken ? 'Taken' : 'Taken by you'}</Text>
-                    </View>
-                )}
-                ListEmptyComponent={
-                    <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>No cases taken yet.</Text>
-                    </View>
-                }
-            />
-        </View>
+                <FlatList
+                    data={lawyerCases.map(caseId => cases.find(c => c.id === caseId)).filter(Boolean)}
+                    keyExtractor={item => item.id}
+                    renderItem={({ item }) => (
+                        <View style={styles.caseCard}>
+                            <Text style={styles.caseTitle}>{item.issues}</Text>
+                            <Text style={styles.caseDetails}>{item.taken ? 'Taken' : 'Taken by you'}</Text>
+                            <Text style={styles.caseDate}>Date: {item.date}</Text>
+                            <Text style={styles.caseTime}>Time: {item.time}</Text>
+                        </View>
+                    )}
+                    ListEmptyComponent={
+                        <View style={styles.emptyContainer}>
+                            <Text style={styles.emptyText}>No cases taken yet.</Text>
+                        </View>
+                    }
+                />
+
+                {/* Bar Chart */}
+                <BarChart
+                    data={barChartData}
+                    width={Dimensions.get('window').width - 40}
+                    height={220}
+                    chartConfig={{
+                        backgroundColor: '#e26a00',
+                        backgroundGradientFrom: '#fb8c00',
+                        backgroundGradientTo: '#ffa726',
+                        decimalPlaces: 2,
+                        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                        style: {
+                            borderRadius: 16,
+                        },
+                        propsForDots: {
+                            r: '6',
+                            strokeWidth: '4',
+                            stroke: '#ffa726',
+                        },
+                    }}
+                    style={{
+                        marginVertical: 8,
+                        borderRadius: 16,
+                    }}
+                />
+
+                {/* Pie Chart */}
+                <PieChart
+                    data={pieChartData}
+                    width={Dimensions.get('window').width - 40}
+                    height={220}
+                    chartConfig={{
+                        color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    }}
+                    accessor="population"
+                    backgroundColor="transparent"
+                    paddingLeft="15"
+                    absolute
+                />
+            </View>
+        </ScrollView>
     );
-};
+}
 
 const styles = StyleSheet.create({
+    scrollContainer: {
+        flexGrow: 1,
+    },
     container: {
         flex: 1,
         backgroundColor: '#eaeaea',
@@ -50,15 +129,24 @@ const styles = StyleSheet.create({
         padding: 20,
         borderRadius: 12,
         marginBottom: 15,
-        elevation: 3,
+        elevation: 6,
     },
     caseTitle: {
-        fontSize: 18,
+        fontSize: 15,
         color: '#333',
+    },
+    caseDate: {
+        fontSize: 14,
+        color: '#333',
+        marginTop: 4,
+    },
+    caseTime: {
+        fontSize: 14,
+        color: '#333',
+        marginTop: 2,
     },
     caseDetails: {
         fontSize: 16,
-        color: '#666',
         fontWeight: 'bold',
         marginTop: 10,
         color: 'red',
@@ -87,6 +175,9 @@ const styles = StyleSheet.create({
 });
 
 export default MyCases;
+
+
+
 
 // import React, { useMemo } from 'react';
 // import { View, Text, FlatList, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';

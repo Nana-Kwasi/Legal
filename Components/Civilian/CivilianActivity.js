@@ -12,7 +12,7 @@ const CivilianActivity = ({ navigation }) => {
     const handleSignOut = () => {
         signOut(auth)
             .then(() => {
-                navigation.navigate('Continue');
+                navigation.navigate('LogIn');
                 // console.log('Signed Out');
             })
             .catch((error) => {

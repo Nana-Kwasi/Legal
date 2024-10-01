@@ -136,32 +136,36 @@ const LawyerActivity = ({ navigation }) => {
     const db = getFirestore(app);
     const [lawyerId, setLawyerId] = useState(null);
     const [fullName, setFullName] = useState('');
-    const userEmail = auth.currentUser.email;
+    const userEmail = auth.currentUser ? auth.currentUser.email : null; // Add check here
 
     useEffect(() => {
-        const fetchLawyerData = async () => {
-            try {
-                const q = query(collection(db, 'Lawyer'), where('email', '==', userEmail));
-                const querySnapshot = await getDocs(q);
-                if (!querySnapshot.empty) {
-                    querySnapshot.forEach((doc) => {
-                        setLawyerId(doc.id);
-                        setFullName(doc.data().fullName); // Fetch the full name
-                    });
-                } else {
-                    console.log('No matching documents.');
+        if (userEmail) {  // Check if userEmail is not null
+            const fetchLawyerData = async () => {
+                try {
+                    const q = query(collection(db, 'Lawyer'), where('email', '==', userEmail));
+                    const querySnapshot = await getDocs(q);
+                    if (!querySnapshot.empty) {
+                        querySnapshot.forEach((doc) => {
+                            setLawyerId(doc.id);
+                            setFullName(doc.data().fullName); // Fetch the full name
+                        });
+                    } else {
+                        console.log('No matching documents.');
+                    }
+                } catch (error) {
+                    console.error('Error fetching document:', error);
                 }
-            } catch (error) {
-                console.error('Error fetching document:', error);
-            }
-        };
+            };
 
-        fetchLawyerData();
+            fetchLawyerData();
+        } else {
+            console.log('User is not authenticated or email is not available.');
+        }
     }, [userEmail]);
 
     const handleSignOut = () => {
         signOut(auth).then(() => {
-            navigation.navigate('Continue');
+            navigation.navigate('LogIn');
         }).catch((error) => {
             console.log(error);
         });
@@ -229,7 +233,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: 'white',
     },
-    fullName: {  // Updated style for full name
+    fullName: {  
         fontSize: 15,
         fontWeight: '400',
         color: '#243035',
