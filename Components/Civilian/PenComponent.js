@@ -115,7 +115,7 @@ import { View, ScrollView, KeyboardAvoidingView, TextInput, StyleSheet, Text, Pl
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { v4 as uuidv4 } from "uuid";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
-import * as DocumentPicker from 'expo-document-picker'; // Import DocumentPicker
+// import * as DocumentPicker from 'expo-document-picker'; // Import DocumentPicker
 import app from '../../Authentication/Firebase/Config';
 import { useCases } from './CaseContext';
 
@@ -128,7 +128,7 @@ const PenComponent = ({ navigation }) => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [email, setEmail] = useState('');
     const [isSpinning, setIsSpinning] = useState(false);
-    const [selectedFile, setSelectedFile] = useState(null); // State to store the selected file
+    // const [selectedFile, setSelectedFile] = useState(null); // State to store the selected file
     const { addCase } = useCases();
 
     const spinValue = useRef(new Animated.Value(0)).current;
@@ -164,22 +164,22 @@ const PenComponent = ({ navigation }) => {
         return { date, time };
     };
 
-    const pickDocument = async () => {
-        try {
-            let result = await DocumentPicker.getDocumentAsync({});
-            console.log('Document Picker Result:', result); 
+    // const pickDocument = async () => {
+    //     try {
+    //         let result = await DocumentPicker.getDocumentAsync({});
+    //         console.log('Document Picker Result:', result); 
     
-            if (result.type === 'success' || (result.assets && result.assets.length > 0)) {
-                const file = result.assets ? result.assets[0] : result;
-                setSelectedFile(file);
-                console.log('Selected File:', file.name);
-            } else {
-                console.log('Document Picker Cancelled or Failed'); 
-            }
-        } catch (error) {
-            console.error('Error picking document:', error); 
-        }
-    };
+    //         if (result.type === 'success' || (result.assets && result.assets.length > 0)) {
+    //             const file = result.assets ? result.assets[0] : result;
+    //             setSelectedFile(file);
+    //             console.log('Selected File:', file.name);
+    //         } else {
+    //             console.log('Document Picker Cancelled or Failed'); 
+    //         }
+    //     } catch (error) {
+    //         console.error('Error picking document:', error); 
+    //     }
+    // };
     
     const handleIssues = async () => {
         if (!phoneNumber || !email) {
@@ -191,21 +191,21 @@ const PenComponent = ({ navigation }) => {
     
         const { date, time } = getCurrentDateTime();
     
-        let fileUrl = null;
+        // let fileUrl = null;
     
-        if (selectedFile) {
-            const uploadUri = selectedFile.uri;
-            const fileName = selectedFile.name;
-            const reference = storage().ref(`documents/${fileName}`);
+        // if (selectedFile) {
+        //     const uploadUri = selectedFile.uri;
+        //     const fileName = selectedFile.name;
+        //     const reference = storage().ref(`documents/${fileName}`);
             
-            try {
-                await reference.putFile(uploadUri);
-                fileUrl = await reference.getDownloadURL();
-            } catch (error) {
-                console.error('Error uploading file:', error);
-                return;
-            }
-        }
+        //     try {
+        //         await reference.putFile(uploadUri);
+        //         fileUrl = await reference.getDownloadURL();
+        //     } catch (error) {
+        //         console.error('Error uploading file:', error);
+        //         return;
+        //     }
+        // }
     
         const newIssue = {
             issues: issues,
@@ -214,8 +214,8 @@ const PenComponent = ({ navigation }) => {
             email: email,
             date: date,
             time: time,
-            fileName: selectedFile?.name || null,
-            fileUri: fileUrl,   // Store the file's download URL
+            // fileName: selectedFile?.name || null,
+            // fileUri: fileUrl,  
         };
         
         console.log(newIssue);
@@ -230,7 +230,7 @@ const PenComponent = ({ navigation }) => {
         setIssues('');
         setPhoneNumber('');
         setEmail('');
-        setSelectedFile(null);
+        // setSelectedFile(null);
         setTimeout(() => {
             setIsSpinning(false);
         }, 1000);
@@ -280,9 +280,9 @@ const PenComponent = ({ navigation }) => {
                                 style={styles.textInput}
                             />
                         </View>
-                        <TouchableOpacity onPress={pickDocument} style={styles.fileInputContainer}>
+                        {/* <TouchableOpacity onPress={pickDocument} style={styles.fileInputContainer}>
                      <Text style={styles.fileInputText}>{selectedFile ? selectedFile.name : 'Upload File'}</Text>
-                       </TouchableOpacity>
+                       </TouchableOpacity> */}
                     </ScrollView>
                     <TouchableOpacity onPress={handleIssues} style={styles.btnContainer}>
                         <Animated.View style={[styles.button, isSpinning && spinStyle]}>

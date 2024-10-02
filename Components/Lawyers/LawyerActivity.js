@@ -125,7 +125,7 @@
 
 // export default LawyerActivity;
 
-import React, { useEffect, useState } from 'react';
+   import React, { useEffect, useState } from 'react';
 import { View, Text, SafeAreaView, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { getAuth, signOut } from "firebase/auth";
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { useCases } from '../Civilian/CaseContext';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -45,76 +45,85 @@ const MyCases = () => {
     }));
 
     return (
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-            <View style={styles.container}>
-                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                    <MaterialIcons name="arrow-back" size={34} color="#000" />
-                </TouchableOpacity>
-                <Text style={styles.backButtonText}>YOUR CASES</Text>
+        <View style={styles.container}>
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                <MaterialIcons name="arrow-back" size={34} color="#000" />
+            </TouchableOpacity>
+            <Text style={styles.backButtonText}>YOUR CASES</Text>
 
-                <FlatList
-                    data={lawyerCases.map(caseId => cases.find(c => c.id === caseId)).filter(Boolean)}
-                    keyExtractor={item => item.id}
-                    renderItem={({ item }) => (
-                        <View style={styles.caseCard}>
-                            <Text style={styles.caseTitle}>{item.issues}</Text>
-                            <Text style={styles.caseDetails}>{item.taken ? 'Taken' : 'Taken by you'}</Text>
-                            <Text style={styles.caseDate}>Date: {item.date}</Text>
-                            <Text style={styles.caseTime}>Time: {item.time}</Text>
-                        </View>
-                    )}
-                    ListEmptyComponent={
-                        <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyText}>No cases taken yet.</Text>
-                        </View>
-                    }
-                />
+            <FlatList
+    data={lawyerCases
+        .map(caseId => cases.find(c => c.id === caseId))
+        .filter(Boolean)
+        .sort((a, b) => {
+            // Parse the dates and times for sorting
+            const dateA = moment(a.date + ' ' + a.time, 'DD/MM/YYYY HH:mm');
+            const dateB = moment(b.date + ' ' + b.time, 'DD/MM/YYYY HH:mm');
+            return dateB - dateA;  // Sort in descending order (newest first)
+        })
+    }
+    keyExtractor={item => item.id}
+    renderItem={({ item }) => (
+        <View style={styles.caseCard}>
+            <Text style={styles.caseTitle}>{item.issues}</Text>
+            <Text style={styles.caseDetails}>{item.taken ? 'Taken' : 'Taken by you'}</Text>
+            <Text style={styles.caseDate}>Date: {item.date}</Text>
+            <Text style={styles.caseTime}>Time: {item.time}</Text>
+        </View>
+    )}
+                ListEmptyComponent={
+                    <View style={styles.emptyContainer}>
+                        <Text style={styles.emptyText}>No cases taken yet.</Text>
+                    </View>
+                }
+                ListFooterComponent={(
+                    <View>
+                        {/* Bar Chart */}
+                        <BarChart
+                            data={barChartData}
+                            width={Dimensions.get('window').width - 40}
+                            height={220}
+                            chartConfig={{
+                                backgroundColor: '#e26a00',
+                                backgroundGradientFrom: '#fb8c00',
+                                backgroundGradientTo: '#ffa726',
+                                decimalPlaces: 2,
+                                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                style: {
+                                    borderRadius: 16,
+                                },
+                                propsForDots: {
+                                    r: '6',
+                                    strokeWidth: '4',
+                                    stroke: '#ffa726',
+                                },
+                            }}
+                            style={{
+                                marginVertical: 8,
+                                borderRadius: 16,
+                            }}
+                        />
 
-                {/* Bar Chart */}
-                <BarChart
-                    data={barChartData}
-                    width={Dimensions.get('window').width - 40}
-                    height={220}
-                    chartConfig={{
-                        backgroundColor: '#e26a00',
-                        backgroundGradientFrom: '#fb8c00',
-                        backgroundGradientTo: '#ffa726',
-                        decimalPlaces: 2,
-                        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                        style: {
-                            borderRadius: 16,
-                        },
-                        propsForDots: {
-                            r: '6',
-                            strokeWidth: '4',
-                            stroke: '#ffa726',
-                        },
-                    }}
-                    style={{
-                        marginVertical: 8,
-                        borderRadius: 16,
-                    }}
-                />
-
-                {/* Pie Chart */}
-                <PieChart
-                    data={pieChartData}
-                    width={Dimensions.get('window').width - 40}
-                    height={220}
-                    chartConfig={{
-                        color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                    }}
-                    accessor="population"
-                    backgroundColor="transparent"
-                    paddingLeft="15"
-                    absolute
-                />
-            </View>
-        </ScrollView>
+                        {/* Pie Chart */}
+                        <PieChart
+                            data={pieChartData}
+                            width={Dimensions.get('window').width - 40}
+                            height={220}
+                            chartConfig={{
+                                color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                            }}
+                            accessor="population"
+                            backgroundColor="transparent"
+                            paddingLeft="15"
+                            absolute
+                        />
+                    </View>
+                )}
+            />
+        </View>
     );
 }
-
 const styles = StyleSheet.create({
     scrollContainer: {
         flexGrow: 1,

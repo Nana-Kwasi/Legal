@@ -382,6 +382,194 @@
 
 
 
+// import React, { useState, useEffect } from 'react';
+// import { View, Text, StyleSheet, TouchableOpacity, Alert, Linking } from 'react-native';
+// import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
+// import { useNavigation } from '@react-navigation/native';
+// import { getFirestore, doc, updateDoc } from 'firebase/firestore';
+// import app from '../../Authentication/Firebase/Config';
+// import { useCases } from '../Civilian/CaseContext';
+
+
+// const LawyerSingularCases = ({ lawyer }) => {
+//     const { id, issues: caseName, phoneNumber, email, taken, date, time, fileName, fileUri } = lawyer; // Destructure fileName and fileUri
+//     const [pressed, setPressed] = useState(false);
+//     const [textColor, setTextColor] = useState(getRandomColor());
+//     const navigation = useNavigation();
+//     const db = getFirestore(app);
+//     const { addLawyerCase, cases, setCases } = useCases();
+
+//     useEffect(() => {
+//         setTextColor(getRandomColor());
+//     }, []);
+
+//     function getRandomColor() {
+//         const colors = ['#263238', '#4E342E', '#1B5E20', '#3E2723'];
+//         return colors[Math.floor(Math.random() * colors.length)];
+//     }
+
+//     const handleThumbPress = () => {
+//         Alert.alert(
+//             "Confirmation",
+//             "Do you want to take on this case?",
+//             [
+//                 {
+//                     text: "No",
+//                     onPress: () => setPressed(false),
+//                     style: "cancel"
+//                 },
+//                 {
+//                     text: "Yes",
+//                     onPress: async () => {
+//                         setPressed(true);
+//                         const caseDocRef = doc(db, "Cases", id);
+//                         await updateDoc(caseDocRef, {
+//                             taken: true,
+//                             lawyerId: lawyer.id // Assuming `lawyer.id` is available in props
+//                         });
+//                         addLawyerCase(id);
+//                         setCases(prevCases =>
+//                             prevCases.map(c => c.id === id ? { ...c, taken: true, lawyerId: lawyer.id } : c)
+//                         );
+//                         // navigation.navigate('Chat');
+//                     }
+//                 }
+//             ],
+//             { cancelable: true }
+//         );
+//     };
+
+//     const handlePhonePress = () => {
+//         if (phoneNumber) {
+//             Linking.openURL(`tel:${phoneNumber}`);
+//         }
+//     };
+
+//     const handleEmailPress = () => {
+//         if (email) {
+//             Linking.openURL(`mailto:${email}`);
+//         }
+//     };
+
+//     const handleWhatsAppPress = () => {
+//         if (phoneNumber) {
+//             Linking.openURL(`whatsapp://send?phone=${phoneNumber}`);
+//         }
+//     };
+//     const handleFilePress = async () => {
+//         try {
+//             if (fileUri) {
+//                 await FileViewer.open(fileUri);
+//             }
+//         } catch (error) {
+//             console.error("Error opening file:", error);
+//         }
+//     };
+
+//     return (
+//         <View>
+//             <View style={styles.card}>
+//                 <View style={styles.caseContent}>
+//                     <TouchableOpacity onPress={handleThumbPress} disabled={taken}>
+//                         <MaterialIcons name={pressed ? "thumb-up-alt" : "thumb-up-off-alt"} size={30} color="#000" />
+//                     </TouchableOpacity>
+//                     <Text style={[styles.caseText, { color: textColor }]}>{caseName || "No case name available"}</Text>
+//                 </View>
+//                 {!taken && (
+//                     <View style={styles.iconRow}>
+//                         <TouchableOpacity onPress={handlePhonePress}>
+//                             <MaterialIcons name="phone" size={22} color="#000" style={styles.icon} />
+//                         </TouchableOpacity>
+//                         <TouchableOpacity onPress={handleEmailPress}>
+//                             <MaterialIcons name="email" size={22} color="#000" style={styles.icon} />
+//                         </TouchableOpacity>
+//                         <TouchableOpacity onPress={handleWhatsAppPress}>
+//                             <FontAwesome name="whatsapp" size={22} color="#000" style={styles.icon} />
+//                         </TouchableOpacity>
+//                     </View>
+//                 )}
+//                 {taken && <Text style={styles.takenText}>Taken</Text>}
+//                 <View style={styles.additionalInfo}>
+//                     <Text style={styles.infoText}>{date}</Text>
+//                     <Text style={styles.infoText}>{time}</Text>
+//                 </View>
+//                 {fileName && (
+//                     <View style={styles.fileInfo}>
+//                         <Text style={styles.fileText}>File: {fileName}</Text>
+//                         <TouchableOpacity onPress={handleFilePress}>
+//                             <Text style={styles.fileLink}>Open File</Text>
+//                         </TouchableOpacity>
+//                     </View>
+//                 )}
+//             </View>
+//         </View>
+//     );
+// };
+
+
+// const styles = StyleSheet.create({
+//     card: {
+//         margin: 10,
+//         padding: 15,
+//         flexDirection: 'column',
+//         alignItems: 'flex-start',
+//         justifyContent: 'flex-start',
+//         borderRadius: 10,
+//         backgroundColor: '#fff',
+//         elevation: 20,
+//     },
+//     caseContent: {
+//         flexDirection: 'row',
+//         alignItems: 'center',
+//     },
+//     caseText: {
+//         fontSize: 15,
+//         marginLeft: 15,
+//         marginRight: 15,
+//         flex: 1,
+//     },
+//     takenText: {
+//         color: 'black',
+//         fontSize: 30,
+//         marginTop: 10,
+//     },
+//     additionalInfo: {
+//         flexDirection: 'row',
+//         marginTop: 5,
+//     },
+//     infoText: {
+//         color: '#000',
+//         fontSize: 15,
+//         marginLeft: 10,
+//     },
+//     iconRow: {
+//         flexDirection: 'row',
+//         justifyContent: 'space-between',
+//         marginTop: 10,
+//         width: '100%',
+//     },
+//     icon: {
+//         marginHorizontal: 50,
+//     },
+//     fileInfo: {
+//         marginTop: 10,
+//         borderTopWidth: 1,
+//         borderTopColor: '#ccc',
+//         paddingTop: 10,
+//     },
+//     fileText: {
+//         fontSize: 14,
+//         color: '#333',
+//     },
+//     fileLink: {
+//         fontSize: 14,
+//         color: '#007bff',
+//         textDecorationLine: 'underline',
+//         marginTop: 5,
+//     },
+// });
+
+// export default LawyerSingularCases;
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Linking } from 'react-native';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
@@ -389,7 +577,6 @@ import { useNavigation } from '@react-navigation/native';
 import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 import app from '../../Authentication/Firebase/Config';
 import { useCases } from '../Civilian/CaseContext';
-
 
 const LawyerSingularCases = ({ lawyer }) => {
     const { id, issues: caseName, phoneNumber, email, taken, date, time, fileName, fileUri } = lawyer; // Destructure fileName and fileUri
@@ -400,8 +587,19 @@ const LawyerSingularCases = ({ lawyer }) => {
     const { addLawyerCase, cases, setCases } = useCases();
 
     useEffect(() => {
+        // Set a random color when the component mounts
         setTextColor(getRandomColor());
     }, []);
+
+    useEffect(() => {
+        // Sort cases by time when the component mounts
+        const sortedCases = [...cases].sort((a, b) => {
+            const timeA = new Date(`1970-01-01T${a.time}`).getTime();
+            const timeB = new Date(`1970-01-01T${b.time}`).getTime();
+            return timeB - timeA; // Descending order
+        });
+        setCases(sortedCases);
+    }, []); // Empty dependency array to run this effect only once, on mount
 
     function getRandomColor() {
         const colors = ['#263238', '#4E342E', '#1B5E20', '#3E2723'];
@@ -456,6 +654,7 @@ const LawyerSingularCases = ({ lawyer }) => {
             Linking.openURL(`whatsapp://send?phone=${phoneNumber}`);
         }
     };
+
     const handleFilePress = async () => {
         try {
             if (fileUri) {
@@ -505,7 +704,6 @@ const LawyerSingularCases = ({ lawyer }) => {
         </View>
     );
 };
-
 
 const styles = StyleSheet.create({
     card: {
@@ -570,3 +768,5 @@ const styles = StyleSheet.create({
 });
 
 export default LawyerSingularCases;
+
+

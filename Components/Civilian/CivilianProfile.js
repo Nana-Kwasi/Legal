@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, Text, SafeAreaView, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import app from '../../Authentication/Firebase/Config';
+import { getAuth } from 'firebase/auth';
+import { Ionicons } from '@expo/vector-icons';
 
-const CivilianProfile = ({ route, navigation }) => {
-    const [civilian, setCivilian] = useState(null);
-    const { civilianId } = route.params;
+const CivilianProfileScreen = ({ route, navigation }) => {
+    const { civilianId } = route.params; // Get the civilianId from route parameters
+    const [civilianData, setCivilianData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const auth = getAuth(app);
     const db = getFirestore(app);
 
     useEffect(() => {
@@ -14,65 +18,108 @@ const CivilianProfile = ({ route, navigation }) => {
                 const docRef = doc(db, 'Civilian', civilianId);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
-                    setCivilian(docSnap.data());
+                    setCivilianData(docSnap.data());
                 } else {
                     console.log('No such document!');
                 }
             } catch (error) {
                 console.error('Error fetching document:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchCivilianData();
-    }, [civilianId]);
+    }, [civilianId, db]);
 
-    const handleClose = () => {
-        navigation.goBack();
+    const handleSignOut = () => {
+        signOut(auth)
+            .then(() => {
+                navigation.navigate('LogIn');
+            })
+            .catch((error) => {
+                console.log(error);
+            });
     };
 
-    if (!civilian) {
+    if (loading) {
         return (
-            <View style={styles.container}>
-                <Text>Loading...</Text>
-            </View>
+            <SafeAreaView style={styles.container}>
+                <ActivityIndicator size="large" color="#fff" />
+            </SafeAreaView>
         );
     }
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.label}>Username:</Text>
-            <Text style={styles.value}>{civilian.username}</Text>
-
-            <Text style={styles.label}>Password:</Text>
-            <Text style={styles.value}>{civilian.password}</Text>
-
-            <Text style={styles.label}>Phone Number:</Text>
-            <Text style={styles.value}>{civilian.phoneNumber}</Text>
-
-            <Text style={styles.label}>Email:</Text>
-            <Text style={styles.value}>{civilian.email}</Text>
-
-            <Button title="Close" onPress={handleClose} />
-        </View>
+        <SafeAreaView style={styles.container}>
+            <View style={styles.header}>
+                <Text style={styles.headerText}>Civilian Profile</Text>
+                <TouchableOpacity onPress={handleSignOut}>
+                    <Text style={styles.signOut}>Sign Out</Text>
+                </TouchableOpacity>
+            </View>
+            {civilianData ? (
+                <View style={styles.profileContainer}>
+                    <Ionicons name="person-circle" size={80} color="#243035" />
+                    <Text style={styles.name}>{civilianData.fullName}</Text>
+                    <Text style={styles.email}>{civilianData.email}</Text>
+                    <Text style={styles.phone}>Phone: {civilianData.phoneNumber}</Text>
+                    <Text style={styles.address}>Address: {civilianData.address}</Text>
+                    {/* Add more civilian details as needed */}
+                </View>
+            ) : (
+                <Text style={styles.errorText}>Failed to load civilian data.</Text>
+            )}
+        </SafeAreaView>
     );
 };
+
+export default CivilianProfileScreen;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
-        justifyContent: 'center',
-        backgroundColor: '#f9f9f9',
+        backgroundColor: '#243035',
+        padding: 16,
     },
-    label: {
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingBottom: 16,
+    },
+    headerText: {
+        fontSize: 24,
+        color: '#fff',
+    },
+    signOut: {
         fontSize: 18,
-        fontWeight: 'bold',
-        marginTop: 10,
+        color: '#ff6347', // Red color for sign out button
     },
-    value: {
+    profileContainer: {
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    name: {
+        fontSize: 22,
+        color: '#fff',
+        marginVertical: 10,
+    },
+    email: {
+        fontSize: 18,
+        color: '#9fa9a7',
+    },
+    phone: {
         fontSize: 16,
-        marginBottom: 10,
+        color: '#9fa9a7',
+    },
+    address: {
+        fontSize: 16,
+        color: '#9fa9a7',
+    },
+    errorText: {
+        color: 'red',
+        textAlign: 'center',
+        marginTop: 20,
     },
 });
-
-export default CivilianProfile;
